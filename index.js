@@ -1,28 +1,4 @@
 //index.js
-const weatherApi = "https://api.weather.gov/alerts/active?area=";
-
-//Your code here
-async function fetchWeatherAlerts(state) {
-try {
-    const response = await fetch(`${weatherApi}${state}`);
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-
-    const data = await response.json();
-    console.log(data)
-
-  } catch (error) {
-    console.log("Error:", error.message);
-  }
-  fetch(`https://api.weather.gov/alerts/active?area=${STATE_ABBR}`)
-  .then(response=>response.json())
-  .then(data=>{console.log(data)})
-
-  data.forEach(u)
-
-}
 
 const weatherApi = "https://api.weather.gov/alerts/active?area=";
 
@@ -65,12 +41,12 @@ function displayAlerts(data, state) {
   const summary = document.createElement("h2");
   summary.textContent = `Current watches, warnings, and advisories for ${state.toUpperCase()}: ${alerts.length}`;
   alertsContainer.appendChild(summary);
-
   if (alerts.length === 0) {
     const noAlerts = document.createElement("p");
     noAlerts.textContent = "No active alerts for this state.";
     alertsContainer.appendChild(noAlerts);
     return;
+
   }
   const list = document.createElement("ul");
 
@@ -92,7 +68,6 @@ function clearError() {
   errorDiv.textContent = "";
   errorDiv.style.display = "none";
 }
-
 function clearInput() {
   const input = document.getElementById("state-input");
   input.value = "";
@@ -101,4 +76,5 @@ function clearInput() {
 document.getElementById("fetch-btn").addEventListener("click", () => {
   const state = document.getElementById("state-input").value.trim().toUpperCase();
   fetchWeatherAlerts(state);
+
 });

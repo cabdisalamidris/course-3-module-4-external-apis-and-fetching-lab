@@ -1,80 +1,53 @@
-//index.js
 
-const weatherApi = "https://api.weather.gov/alerts/active?area=";
+// index.js
+const weatherApi = "https://api.weather.gov/alerts/active?area="
 
-// Fetch alerts
-async function fetchWeatherAlerts(state) {
-  try {
-    // Input validation
-    if (!state || state.length !== 2) {
-      throw new Error("Please enter a valid 2-letter state code.");
-    }
+// Get DOM elements
+const stateInput = document.getElementById('state-input');
+const fetchButton = document.getElementById('fetch-alerts');
+const alertsDisplay = document.getElementById('alerts-display');
+const errorMessage = document.getElementById('error-message');
 
-    const response = await fetch(`${weatherApi}${state}`);
+// Add click event listener
+fetchButton.addEventListener('click', () => {
+  const stateAbbr = stateInput.value.trim();
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch weather alerts.");
-    }
+  // Clear error message
+  errorMessage.textContent = '';
+  errorMessage.classList.add('hidden');
 
-    const data = await response.json();
-    console.log(data);
+  // Clear previous alerts
+  alertsDisplay.innerHTML = '';
 
-    // Display alerts
-    displayAlerts(data, state);
+  // Fetch weather data
+  fetch(weatherApi + stateAbbr)
+    .then(response => response.json())
+    .then(data => {
+      // Extract title and alert count
+      const title = data.title;
+      const alertCount = data.features.length;
 
-    clearError();
+      // Display summary
+      const summary = document.createElement('h2');
+      summary.textContent =` ${title}: ${alertCount};`
+      alertsDisplay.appendChild(summary);
 
-    clearInput();
+      // Display alert headlines
+      const list = document.createElement('ul');
+      data.features.forEach(alert => {
+        const li = document.createElement('li');
+        li.textContent = alert.properties.headline;
+        list.appendChild(li);
+      });
+      alertsDisplay.appendChild(list);
 
-  } catch (error) {
-    displayError(error.message);
-  }
-}
-
-function displayAlerts(data, state) {
-  const alertsContainer = document.getElementById("alerts");
-  alertsContainer.innerHTML = ""; 
-
-  const alerts = data.features;
-
-  
-  const summary = document.createElement("h2");
-  summary.textContent = `Current watches, warnings, and advisories for ${state.toUpperCase()}: ${alerts.length}`;
-  alertsContainer.appendChild(summary);
-  if (alerts.length === 0) {
-    const noAlerts = document.createElement("p");
-    noAlerts.textContent = "No active alerts for this state.";
-    alertsContainer.appendChild(noAlerts);
-    return;
-
-  }
-  const list = document.createElement("ul");
-
-  alerts.forEach(alert => {
-    const listItem = document.createElement("li");
-    listItem.textContent = alert.properties.headline;
-    list.appendChild(listItem);
-  });
-
-  alertsContainer.appendChild(list);
-}
-function displayError(message) {
-  const errorDiv = document.getElementById("error-message");
-  errorDiv.textContent = message;
-  errorDiv.style.display = "block";
-}
-function clearError() {
-  const errorDiv = document.getElementById("error-message");
-  errorDiv.textContent = "";
-  errorDiv.style.display = "none";
-}
-function clearInput() {
-  const input = document.getElementById("state-input");
-  input.value = "";
-}
-
-document.getElementById("fetch-btn").addEventListener("click", () => {
-  const state = document.getElementById("state-input").value.trim().toUpperCase();
-  fetchWeatherAlerts(state);
-
+      // Clear input
+      stateInput.value = '';
+    })
+    .catch(error => {
+      // Display error message
+      errorMessage.textContent = error.message;
+      errorMessage.classList.remove('hidden');
+    });
 });
+
